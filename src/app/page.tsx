@@ -13,7 +13,7 @@ import { Logo } from '@/components/icons/Logo';
 // For example, to show the loading elements for 3 seconds, set LOAD_DURATION to 3000.
 // To make the splash screen very short (e.g., mostly for _gl processing), 
 // you could set this to a small value like 100 (0.1 seconds).
-const LOAD_DURATION = 300; 
+const LOAD_DURATION = 100; 
 
 export default function SplashScreen() {
   const router = useRouter();
