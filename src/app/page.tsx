@@ -10,8 +10,7 @@ import { Logo } from '@/components/icons/Logo';
 // main content (logo, loader, text) is visible. After this duration,
 // a fade-out animation (currently 300ms) begins, and then navigation to '/profile' occurs.
 // Adjust this value to change how long the main loading elements are displayed.
-// For example, to show the loading elements for 3 seconds, set LOAD_DURATION to 3000.
-const LOAD_DURATION = 1000; 
+const LOAD_DURATION = 5000; // Default: 1000ms = 1 second for active loading phase
 
 export default function SplashScreen() {
   const router = useRouter();
