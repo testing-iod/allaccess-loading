@@ -10,7 +10,10 @@ import { Logo } from '@/components/icons/Logo';
 // main content (logo, loader, text) is visible. After this duration,
 // a fade-out animation (currently 300ms) begins, and then navigation to '/profile' occurs.
 // Adjust this value to change how long the main loading elements are displayed.
-const LOAD_DURATION = 500; // Default: 1000ms = 1 second for active loading phase
+// For example, to show the loading elements for 3 seconds, set LOAD_DURATION to 3000.
+// To make the splash screen very short (e.g., mostly for _gl processing), 
+// you could set this to a small value like 100 (0.1 seconds).
+const LOAD_DURATION = 1000; 
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -24,18 +27,31 @@ export default function SplashScreen() {
 
       if (glParam) {
         const parts = glParam.split('*');
-        // The _gl parameter typically follows a format like: version*linker_data*key1*value1*key2*value2...
-        // We iterate through the parts to find known GA cookie keys (_ga, _ga_CONTAINER_ID)
+        // The _gl parameter typically follows a format like: version*linker_data_segment1*linker_data_segment2...
+        // where some segments are keys (e.g., _ga, _ga_CONTAINER_ID) and subsequent segments are their values.
         for (let i = 0; i < parts.length - 1; i++) {
           const keyCandidate = parts[i];
-          const valueCandidate = parts[i + 1]; // The value associated with the keyCandidate
-
+          
           // Check if the keyCandidate is a GA cookie name we want to process
           if (keyCandidate === '_ga' || (keyCandidate.startsWith('_ga_') && keyCandidate !== '_ga')) {
             const cookieName = keyCandidate;
-            const cookieValue = valueCandidate;
+            let cookieValue = parts[i + 1]; // The value associated with the keyCandidate
+
+            try {
+              // Attempt to Base64 decode the value as per user request.
+              // Standard GA linker values are not typically Base64 encoded.
+              // This step assumes a specific custom encoding might be in use.
+              const decodedValue = atob(cookieValue); // Browser's built-in Base64 decoder
+              cookieValue = decodedValue;
+              // console.log(`Successfully Base64 decoded value for ${cookieName}: ${cookieValue}`);
+            } catch (e) {
+              // If decoding fails, it means the string was not valid Base64.
+              // Log a warning and proceed with the original value.
+              console.warn(`Value for cookie ${cookieName} from _gl parameter ('${cookieValue}') does not appear to be Base64 encoded or is invalid. Using original value. Error:`, e);
+            }
 
             // Set the cookie. GA cookies typically have a 2-year lifespan.
+            // Assigning to document.cookie with the same name, path, and domain will replace/update the existing cookie.
             const twoYearsInSeconds = 2 * 365 * 24 * 60 * 60;
             let cookieString = `${cookieName}=${cookieValue}; path=/; max-age=${twoYearsInSeconds}`;
             
@@ -88,3 +104,4 @@ export default function SplashScreen() {
     </div>
   );
 }
+
