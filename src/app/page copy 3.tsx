@@ -6,34 +6,40 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/icons/Logo';
 
-// Duration Load Page (in milliseconds)
-const LOAD_DURATION = 1000; 
+// This constant defines the duration (in milliseconds) the splash screen's
+// main content (logo, loader, text) is visible *before* the fade-out animation begins.
+// After this duration, the fade-out starts.
+const LOAD_DURATION = 300; 
 
-const GL_PARAM_PROCESS_DELAY = 1000; // Example: Set to 1000ms for a 1-second delay
+// This constant defines the delay (in milliseconds) *before* the `_gl` parameter
+// processing logic begins. This processing runs independently of the main splash screen
+// navigation timer. For example, to delay `_gl` processing by 1 second, set this to 1000.
+const GL_PARAM_PROCESS_DELAY = 5000; // Example: Set to 1000ms for a 1-second delay
 
-// Duration of the fade-out animation for the Load Page (in milliseconds).
-const FADE_OUT_DURATION = 100; // Matches `duration-300`
+// Duration of the fade-out animation for the splash screen (in milliseconds).
+// This should ideally match any CSS transition durations for opacity.
+const FADE_OUT_DURATION = 300; // Matches `duration-300` in Tailwind CSS
 
-export default function LoadingPage() { // Renamed component for clarity
+export default function SplashScreen() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    console.log(`LoadingPage Effect: Mounting. GL_PARAM_PROCESS_DELAY=${GL_PARAM_PROCESS_DELAY}ms, LOAD_DURATION=${LOAD_DURATION}ms, FADE_OUT_DURATION=${FADE_OUT_DURATION}ms`);
+    console.log(`SplashScreen Effect: Mounting. GL_PARAM_PROCESS_DELAY=${GL_PARAM_PROCESS_DELAY}ms, LOAD_DURATION=${LOAD_DURATION}ms, FADE_OUT_DURATION=${FADE_OUT_DURATION}ms`);
 
     const glProcessScheduledTime = Date.now() + GL_PARAM_PROCESS_DELAY;
-    console.log(`LoadingPage Effect: _gl parameter processing scheduled to start around: ${new Date(glProcessScheduledTime).toLocaleTimeString()}.${glProcessScheduledTime % 1000}`);
+    console.log(`SplashScreen Effect: _gl parameter processing scheduled to start around: ${new Date(glProcessScheduledTime).toLocaleTimeString()}.${glProcessScheduledTime % 1000}`);
 
     // Timer for _gl parameter processing.
     // This timer runs independently and its callback executes after GL_PARAM_PROCESS_DELAY.
     const glParamTimer = setTimeout(() => {
-      console.log(`LoadingPage Effect: _gl parameter processing starting now: ${new Date().toLocaleTimeString()}.${Date.now() % 1000}`);
+      console.log(`SplashScreen Effect: _gl parameter processing starting now: ${new Date().toLocaleTimeString()}.${Date.now() % 1000}`);
       try {
         const params = new URLSearchParams(window.location.search);
         const glParam = params.get('_gl');
 
         if (glParam) {
-          console.log("LoadingPage Effect: Found _gl parameter:", glParam);
+          console.log("SplashScreen Effect: Found _gl parameter:", glParam);
           const parts = glParam.split('*');
           for (let i = 0; i < parts.length - 1; i++) {
             const keyCandidate = parts[i];
@@ -43,7 +49,6 @@ export default function LoadingPage() { // Renamed component for clarity
               let cookieValue = parts[i + 1]; 
 
               try {
-                // Attempt to Base64 decode the value
                 const decodedValue = atob(cookieValue);
                 // console.log(`Successfully Base64 decoded value for ${cookieName}: ${decodedValue}`);
                 cookieValue = decodedValue;
@@ -54,10 +59,7 @@ export default function LoadingPage() { // Renamed component for clarity
               const twoYearsInSeconds = 2 * 365 * 24 * 60 * 60;
               let cookieString = `${cookieName}=${cookieValue}; path=/; max-age=${twoYearsInSeconds}`;
               
-              // Ensure SameSite=Lax is generally a good default.
-              // For cross-domain tracking, cookies might sometimes need SameSite=None; Secure.
-              // However, _ga cookies are typically first-party.
-              cookieString += "; SameSite=Lax"; 
+              cookieString += "; SameSite=Lax";
               
               if (window.location.protocol === 'https:') {
                 cookieString += "; Secure";
@@ -68,31 +70,31 @@ export default function LoadingPage() { // Renamed component for clarity
               i++; 
             }
           }
-          console.log("LoadingPage Effect: Finished processing _gl parameter.");
+          console.log("SplashScreen Effect: Finished processing _gl parameter.");
         } else {
-          // console.log("LoadingPage Effect: No _gl parameter found.");
+          // console.log("SplashScreen Effect: No _gl parameter found.");
         }
       } catch (error) {
-        console.error('LoadingPage Effect: Error processing _gl parameter or setting cookies:', error);
+        console.error('SplashScreen Effect: Error processing _gl parameter or setting cookies:', error);
       }
     }, GL_PARAM_PROCESS_DELAY);
 
     const navigationFadeOutScheduledTime = Date.now() + LOAD_DURATION;
-    console.log(`LoadingPage Effect: Navigation fade-out scheduled to start around: ${new Date(navigationFadeOutScheduledTime).toLocaleTimeString()}.${navigationFadeOutScheduledTime % 1000}`);
+    console.log(`SplashScreen Effect: Navigation fade-out scheduled to start around: ${new Date(navigationFadeOutScheduledTime).toLocaleTimeString()}.${navigationFadeOutScheduledTime % 1000}`);
 
-    // Page navigation timer logic.
-    // This timer controls when the page content starts to fade out and then navigates.
+    // Splash screen timer logic for navigation.
+    // This timer controls when the splash screen starts to fade out and then navigates.
     // It runs independently of the glParamTimer.
     const navigationTimer = setTimeout(() => {
-      console.log(`LoadingPage Effect: Navigation fade-out starting now: ${new Date().toLocaleTimeString()}.${Date.now() % 1000}`);
+      console.log(`SplashScreen Effect: Navigation fade-out starting now: ${new Date().toLocaleTimeString()}.${Date.now() % 1000}`);
       setIsVisible(false);
       
       const navigationPushScheduledTime = Date.now() + FADE_OUT_DURATION;
-      console.log(`LoadingPage Effect: Actual navigation to /profile scheduled around: ${new Date(navigationPushScheduledTime).toLocaleTimeString()}.${navigationPushScheduledTime % 1000}`);
+      console.log(`SplashScreen Effect: Actual navigation to /profile scheduled around: ${new Date(navigationPushScheduledTime).toLocaleTimeString()}.${navigationPushScheduledTime % 1000}`);
       
       // Wait for fade out animation (defined by FADE_OUT_DURATION) before navigating
       setTimeout(() => {
-        console.log(`LoadingPage Effect: Navigating to /profile now: ${new Date().toLocaleTimeString()}.${Date.now() % 1000}`);
+        console.log(`SplashScreen Effect: Navigating to /profile now: ${new Date().toLocaleTimeString()}.${Date.now() % 1000}`);
         router.push('/profile');
       }, FADE_OUT_DURATION); 
     }, LOAD_DURATION);
@@ -101,7 +103,7 @@ export default function LoadingPage() { // Renamed component for clarity
     // This is important to prevent memory leaks and unexpected behavior if the
     // component unmounts before timers complete (e.g., user navigates away manually).
     return () => {
-      console.log(`LoadingPage Effect: Unmounting. Clearing timers.`);
+      console.log(`SplashScreen Effect: Unmounting. Clearing timers.`);
       clearTimeout(glParamTimer);
       clearTimeout(navigationTimer);
     };
@@ -109,7 +111,7 @@ export default function LoadingPage() { // Renamed component for clarity
 
   return (
     <div
-      className={`flex min-h-screen flex-col items-center justify-center bg-background transition-opacity duration-300 ease-in-out ${
+      className={`fixed inset-0 flex flex-col items-center justify-center bg-background transition-opacity duration-300 ease-in-out ${
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
       aria-live="polite"
